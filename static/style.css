@@ -1,0 +1,231 @@
+/* =======================
+   GENERAL PAGE STYLES
+   ======================= */
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  color: #2d3436;
+  background: #e0f7fa; /* Soft mint green page background */
+}
+
+/* =======================
+   HEADER
+   ======================= */
+header {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  text-align: center;
+  padding: 30px 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+header p {
+  margin-top: 5px;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+/* =======================
+   MAIN CONTAINER
+   ======================= */
+.container {
+  width: 90%;
+  max-width: 1150px;
+  margin: 40px auto;
+  background: #ffffffcc; /* semi-transparent white */
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* =======================
+   FILTERS SECTION
+   ======================= */
+.filters-section h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+.filters {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.filters a {
+  display: inline-block;
+  background: #ff7675;
+  color: white;
+  padding: 10px 18px;
+  margin: 0 6px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.filters a:hover {
+  background: #d63031;
+}
+
+/* DATE RANGE FILTER */
+.date-filter {
+  text-align: center;
+  margin: 15px 0 25px;
+}
+.date-filter label {
+  margin: 0 5px;
+  font-weight: 500;
+}
+.date-filter input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.date-filter button {
+  padding: 8px 18px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: 0.3s;
+}
+.date-filter button:hover {
+  background: #341f97;
+}
+
+/* =======================
+   ADD EXPENSE SECTION
+   ======================= */
+.add-expense {
+  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+.add-expense h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.add-form input, .add-form button {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+.add-form button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.add-form button:hover {
+  background: #1e8449;
+}
+
+/* =======================
+   TABLE SECTION
+   ======================= */
+.table-section h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #2d3436;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+}
+thead {
+  background: #0984e3;
+  color: white;
+}
+th, td {
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #dfe6e9;
+}
+tbody tr:nth-child(even) {
+  background: #f1f2f6;
+}
+tbody tr:hover {
+  background: #dfe6e9;
+}
+.delete-btn {
+  background: #e17055;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.delete-btn:hover {
+  background: #d63031;
+}
+.total {
+  text-align: right;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* =======================
+   CHARTS SECTION
+   ======================= */
+.chart-section h3 {
+  text-align: center;
+  margin-top: 40px;
+  color: #2d3436;
+}
+.chart-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 20px;
+}
+.chart-box {
+  width: 700px;
+  background: #ffffffdd; /* semi-transparent white */
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+.chart-box h4 {
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+canvas {
+  width: 100% !important;
+  height: 500px !important;
+}
+
+/* =======================
+   FOOTER
+   ======================= */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #2d3436;
+  background-color: #dfe6e9;
+  margin-top: 40px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}

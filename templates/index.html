@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>💰 Expense Tracker Dashboard</h1>
+    <p>Track, visualize, and manage your daily expenses easily.</p>
+  </header>
+
+  <div class="container">
+    <section class="filters-section">
+      {% if title %}
+        <h2>{{ title }}</h2>
+      {% else %}
+        <h2>All Expenses Overview</h2>
+      {% endif %}
+
+      <div class="filters">
+        <a href="/">All</a>
+        <a href="/filter?type=day">Today</a>
+        <a href="/filter?type=month">This Month</a>
+        <a href="/filter?type=quarter">This Quarter</a>
+        <a href="/filter?type=year">This Year</a>
+      </div>
+
+      <!-- Custom Date Range -->
+      <form class="date-filter" action="/filter" method="POST">
+        <label>From:</label>
+        <input type="date" name="from_date" required>
+        <label>To:</label>
+        <input type="date" name="to_date" required>
+        <button type="submit">Filter by Date Range</button>
+      </form>
+    </section>
+
+    <section class="add-expense">
+      <h3>Add New Expense</h3>
+      <form class="add-form" action="/add" method="POST">
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="text" name="category" placeholder="Category" required>
+        <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+        <input type="date" name="date">
+        <button type="submit">+ Add Expense</button>
+      </form>
+    </section>
+
+    <section class="table-section">
+      <h3>Expense Records</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for expense in expenses %}
+            <tr>
+              <td>{{ expense[0] }}</td>
+              <td>{{ expense[1] }}</td>
+              <td>{{ expense[2] }}</td>
+              <td>₹{{ "%.2f"|format(expense[3]) }}</td>
+              <td>{{ expense[4] }}</td>
+              <td><a href="/delete/{{ expense[0] }}" class="delete-btn">Delete</a></td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="no-data">No expenses found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="total">
+        <h3>Total Expenses: ₹{{ "%.2f"|format(total) }}</h3>
+      </div>
+    </section>
+
+    <!-- Chart Section -->
+    <section class="chart-section">
+      <h3>Expense Insights</h3>
+      <div class="chart-container">
+        <div class="chart-box">
+          <h4>Category Distribution (Pie)</h4>
+          <canvas id="expensePie"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Category-wise Spending (Bar)</h4>
+          <canvas id="expenseBar"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>📊 Expense Tracker | Created for Learning Flask & Data Visualization</p>
+  </footer>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    fetch('/chart-data')
+      .then(res => res.json())
+      .then(data => {
+        const colors = [
+          '#ff7675', '#74b9ff', '#ffeaa7',
+          '#55efc4', '#a29bfe', '#fab1a0',
+          '#81ecec', '#fd79a8'
+        ];
+
+        // Pie Chart
+        new Chart(document.getElementById('expensePie'), {
+          type: 'pie',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              data: data.values,
+              backgroundColor: colors,
+              borderWidth: 1,
+              borderColor: '#fff',
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: { display: false }
+            }
+          }
+        });
+
+        // Bar Chart
+        new Chart(document.getElementById('expenseBar'), {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Total Amount (₹)',
+              data: data.values,
+              backgroundColor: '#74b9ff',
+              borderColor: '#0984e3',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Amount (₹)' },
+                grid: { color: '#ecf0f1' }
+              },
+              x: {
+                title: { display: true, text: 'Categories' },
+                grid: { display: false }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `₹${ctx.parsed.y.toFixed(2)}`
+                }
+              }
+            }
+          }
+        });
+      });
+  </script>
+</body>
+</html>
