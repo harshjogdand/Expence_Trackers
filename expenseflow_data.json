@@ -1,0 +1,63 @@
+{
+    "salary": [
+        {
+            "id": 1789135045.112738,
+            "company": "Capgemini",
+            "amount": 30000.0,
+            "date": "2026-09-01"
+        }
+    ],
+    "transactions": [
+        {
+            "id": 1789134985.40433,
+            "description": "Insurance",
+            "amount": 5000.0,
+            "type": "Expense",
+            "category": "Health",
+            "date": "2026-09-11"
+        },
+        {
+            "id": 1789135691.866685,
+            "description": "Dinner",
+            "amount": 1500.0,
+            "type": "Expense",
+            "category": "Food",
+            "date": "2026-09-11"
+        }
+    ],
+    "budgets": {
+        "Food": 5000.0
+    },
+    "goals": [
+        {
+            "id": 1789220936.803311,
+            "name": "Home",
+            "value": 3000000.0,
+            "saved": 10000.0,
+            "updated_date": "2026-09-12"
+        }
+    ],
+    "deleted_goals": [],
+    "emergency_fund": {
+        "target": 4000000.0,
+        "saved": 7000.0,
+        "updated_date": "2026-09-12"
+    },
+    "emergency_fund_history": [
+        {
+            "id": "ef_20260912194827136795",
+            "amount": 500.0,
+            "date": "2026-09-12"
+        },
+        {
+            "id": "ef_20260912232057050704",
+            "amount": 1000.0,
+            "date": "2026-09-12"
+        },
+        {
+            "id": "ef_20260912233634228490",
+            "amount": 500.0,
+            "date": "2026-09-12"
+        }
+    ]
+}

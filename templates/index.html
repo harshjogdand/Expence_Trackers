@@ -1,179 +1,231 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Expense Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <header>
-    <h1>💰 Expense Tracker Dashboard</h1>
-    <p>Track, visualize, and manage your daily expenses easily.</p>
-  </header>
 
-  <div class="container">
-    <section class="filters-section">
-      {% if title %}
-        <h2>{{ title }}</h2>
-      {% else %}
-        <h2>All Expenses Overview</h2>
-      {% endif %}
+<div class="app">
 
-      <div class="filters">
-        <a href="/">All</a>
-        <a href="/filter?type=day">Today</a>
-        <a href="/filter?type=month">This Month</a>
-        <a href="/filter?type=quarter">This Quarter</a>
-        <a href="/filter?type=year">This Year</a>
-      </div>
-
-      <!-- Custom Date Range -->
-      <form class="date-filter" action="/filter" method="POST">
-        <label>From:</label>
-        <input type="date" name="from_date" required>
-        <label>To:</label>
-        <input type="date" name="to_date" required>
-        <button type="submit">Filter by Date Range</button>
-      </form>
-    </section>
-
-    <section class="add-expense">
-      <h3>Add New Expense</h3>
-      <form class="add-form" action="/add" method="POST">
-        <input type="text" name="description" placeholder="Description" required>
-        <input type="text" name="category" placeholder="Category" required>
-        <input type="number" name="amount" placeholder="Amount" step="0.01" required>
-        <input type="date" name="date">
-        <button type="submit">+ Add Expense</button>
-      </form>
-    </section>
-
-    <section class="table-section">
-      <h3>Expense Records</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for expense in expenses %}
-            <tr>
-              <td>{{ expense[0] }}</td>
-              <td>{{ expense[1] }}</td>
-              <td>{{ expense[2] }}</td>
-              <td>₹{{ "%.2f"|format(expense[3]) }}</td>
-              <td>{{ expense[4] }}</td>
-              <td><a href="/delete/{{ expense[0] }}" class="delete-btn">Delete</a></td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="6" class="no-data">No expenses found.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      <div class="total">
-        <h3>Total Expenses: ₹{{ "%.2f"|format(total) }}</h3>
-      </div>
-    </section>
-
-    <!-- Chart Section -->
-    <section class="chart-section">
-      <h3>Expense Insights</h3>
-      <div class="chart-container">
-        <div class="chart-box">
-          <h4>Category Distribution (Pie)</h4>
-          <canvas id="expensePie"></canvas>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">₹</div>
+            <div>
+                <h2>Expense<span>Flow</span></h2>
+                <small>Money Manager</small>
+            </div>
         </div>
-        <div class="chart-box">
-          <h4>Category-wise Spending (Bar)</h4>
-          <canvas id="expenseBar"></canvas>
+
+        <nav>
+            <a class="active" href="#">
+                <span>⌂</span> Dashboard
+            </a>
+            <a href="#transactions">
+                <span>↕</span> Transactions
+            </a>
+            <a href="#add">
+                <span>＋</span> Add Transaction
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="themeToggle" class="theme-btn">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
         </div>
-      </div>
-    </section>
-  </div>
+    </aside>
 
-  <footer>
-    <p>📊 Expense Tracker | Created for Learning Flask & Data Visualization</p>
-  </footer>
+    <!-- Main Content -->
+    <main class="main">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    fetch('/chart-data')
-      .then(res => res.json())
-      .then(data => {
-        const colors = [
-          '#ff7675', '#74b9ff', '#ffeaa7',
-          '#55efc4', '#a29bfe', '#fab1a0',
-          '#81ecec', '#fd79a8'
-        ];
+        <header class="topbar">
+            <div>
+                <p class="welcome">Welcome back 👋</p>
+                <h1>Financial Dashboard</h1>
+            </div>
 
-        // Pie Chart
-        new Chart(document.getElementById('expensePie'), {
-          type: 'pie',
-          data: {
-            labels: data.labels,
-            datasets: [{
-              data: data.values,
-              backgroundColor: colors,
-              borderWidth: 1,
-              borderColor: '#fff',
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' },
-              title: { display: false }
-            }
-          }
-        });
+            <button id="mobileTheme" class="mobile-theme">🌙</button>
+        </header>
 
-        // Bar Chart
-        new Chart(document.getElementById('expenseBar'), {
-          type: 'bar',
-          data: {
-            labels: data.labels,
-            datasets: [{
-              label: 'Total Amount (₹)',
-              data: data.values,
-              backgroundColor: '#74b9ff',
-              borderColor: '#0984e3',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: { display: true, text: 'Amount (₹)' },
-                grid: { color: '#ecf0f1' }
-              },
-              x: {
-                title: { display: true, text: 'Categories' },
-                grid: { display: false }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => `₹${ctx.parsed.y.toFixed(2)}`
-                }
-              }
-            }
-          }
-        });
-      });
-  </script>
+        <!-- Summary Cards -->
+        <section class="summary-grid">
+
+            <div class="summary-card balance">
+                <div class="card-top">
+                    <span>Total Balance</span>
+                    <div class="card-icon">₹</div>
+                </div>
+
+                <h2 id="balance">₹0.00</h2>
+                <p>Your current available balance</p>
+            </div>
+
+            <div class="summary-card income">
+                <div class="card-top">
+                    <span>Total Income</span>
+                    <div class="card-icon">↗</div>
+                </div>
+
+                <h2 id="income">₹0.00</h2>
+                <p>Money you've received</p>
+            </div>
+
+            <div class="summary-card expense">
+                <div class="card-top">
+                    <span>Total Expenses</span>
+                    <div class="card-icon">↘</div>
+                </div>
+
+                <h2 id="expense">₹0.00</h2>
+                <p>Money you've spent</p>
+            </div>
+
+        </section>
+
+        <div class="content-grid">
+
+            <!-- Add Transaction -->
+            <section class="panel" id="add">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Add Transaction</h2>
+                        <p>Record your income or expense</p>
+                    </div>
+                </div>
+
+                <form id="transactionForm">
+
+                    <div class="form-group">
+                        <label>Transaction Name</label>
+                        <input
+                            type="text"
+                            id="description"
+                            placeholder="e.g. Grocery Shopping"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input
+                                type="number"
+                                id="amount"
+                                placeholder="0.00"
+                                min="1"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="type">
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label>Category</label>
+
+                            <select id="category">
+                                <option value="Food">🍔 Food</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Transport">🚗 Transport</option>
+                                <option value="Bills">💡 Bills</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Health">❤️ Health</option>
+                                <option value="Education">📚 Education</option>
+                                <option value="Salary">💼 Salary</option>
+                                <option value="Other">📦 Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+
+                    </div>
+
+                    <button class="add-btn" type="submit">
+                        ＋ Add Transaction
+                    </button>
+
+                </form>
+            </section>
+
+
+            <!-- Spending Overview -->
+            <section class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Spending Overview</h2>
+                        <p>Your expense breakdown</p>
+                    </div>
+                </div>
+
+                <div id="chart" class="chart"></div>
+
+                <div id="categoryList" class="category-list"></div>
+
+            </section>
+
+        </div>
+
+
+        <!-- Transactions -->
+        <section class="panel transactions-panel" id="transactions">
+
+            <div class="transaction-header">
+
+                <div>
+                    <h2>Recent Transactions</h2>
+                    <p>Your latest financial activity</p>
+                </div>
+
+                <input
+                    type="text"
+                    id="search"
+                    class="search"
+                    placeholder="🔍 Search transactions..."
+                >
+
+            </div>
+
+            <div id="transactionsList" class="transactions-list"></div>
+
+        </section>
+
+        <footer>
+            <p>ExpenseFlow • Personal Finance Dashboard</p>
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
