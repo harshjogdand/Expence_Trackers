@@ -2287,17 +2287,38 @@ class ExpenseFlow:
         stats = tk.Frame(self.content, bg=self.colors["bg"])
         stats.pack(fill="x", pady=5)
 
+        # Analytics summary cards
+        goal_saved = self.historical_goal_saved_total()
+        goal_target = self.goal_target_total()
+        emergency_saved = self.emergency_saved_total()
+        emergency_target = self.emergency_target_total()
+
+        goal_pct = (goal_saved / goal_target * 100) if goal_target > 0 else 0
+        emergency_pct = (emergency_saved / emergency_target * 100) if emergency_target > 0 else 0
+
         values = [
             ("📈", "Savings Rate", f"{self.savings_rate():.1f}%", self.colors["green"]),
             ("🔥", "Avg. Expense", self.average_expense(), self.colors["orange"]),
             ("🏆", "Top Category", self.top_category(), self.colors["red"]),
-            ("🧾", "Transactions", len(self.data["transactions"]), self.colors["primary"])
+            ("🧾", "Transactions", len(self.data["transactions"]), self.colors["primary"]),
+            ("🎯", "Goals", f"{self.money(goal_saved)} / {self.money(goal_target)}", self.colors["orange"]),
+            ("🛡", "Emergency Fund", f"{self.money(emergency_saved)} / {self.money(emergency_target)}", self.colors["green"])
         ]
 
         for i, (icon, title, value, color) in enumerate(values):
             card = self.text_stat_card(stats, icon, title, value, color)
-            card.grid(row=0, column=i, sticky="nsew", padx=5)
+            card.grid(row=0, column=i, sticky="nsew", padx=4)
             stats.columnconfigure(i, weight=1)
+
+        # Make the Analytics summary cards slightly more compact when
+        # six cards are displayed in one row.
+        for child in stats.winfo_children():
+            for label in child.winfo_children():
+                if isinstance(label, tk.Label) and label.cget("text"):
+                    current_font = label.cget("font")
+                    if isinstance(current_font, tuple) and len(current_font) >= 2:
+                        if str(label.cget("text")).startswith(("🎯", "🛡")):
+                            label.configure(font=("Segoe UI", 8, "bold"))
 
         body = tk.Frame(self.content, bg=self.colors["bg"])
         body.pack(fill="both", expand=True, pady=12)
@@ -2305,30 +2326,122 @@ class ExpenseFlow:
         category_panel = self.panel(body, "📊  Category Breakdown")
         category_panel.pack(side="left", fill="both", expand=True, padx=(0, 7))
 
+        # Include regular expenses + Goals + Emergency Fund in Analytics.
+        # This keeps the analytics view consistent with the Dashboard's
+        # spending overview.
         totals = self.category_totals()
+        goal_saved = self.historical_goal_saved_total()
+        emergency_saved = self.emergency_saved_total()
+
+        if goal_saved > 0:
+            totals["🎯 Goals Saved"] = goal_saved
+        if emergency_saved > 0:
+            totals["🛡 Emergency Fund"] = emergency_saved
+
         if not totals:
-            self.empty_message(category_panel, "No expense data", "Add expenses to see analytics.")
+            self.empty_message(category_panel, "No financial data", "Add expenses, goals or emergency-fund savings to see analytics.")
         else:
-            total = sum(totals.values())
+            total = sum(totals.values()) or 1
+
             for category, amount in sorted(totals.items(), key=lambda x: x[1], reverse=True):
                 row = tk.Frame(category_panel, bg=self.colors["card"])
                 row.pack(fill="x", padx=20, pady=5)
 
                 pct = amount / total * 100 if total else 0
 
+                if category == "🎯 Goals Saved":
+                    icon = "🎯"
+                    display_name = "Goals Saved"
+                elif category == "🛡 Emergency Fund":
+                    icon = "🛡"
+                    display_name = "Emergency Fund"
+                else:
+                    icon = ICONS.get(category, "📦")
+                    display_name = category
+
+                top = tk.Frame(row, bg=self.colors["card"])
+                top.pack(fill="x")
+
                 tk.Label(
-                    row,
-                    text=f"{ICONS.get(category, '📦')}  {category}",
+                    top,
+                    text=f"{icon}  {display_name}",
                     font=("Segoe UI", 9, "bold"),
                     bg=self.colors["card"], fg=self.colors["text"]
                 ).pack(side="left")
 
                 tk.Label(
-                    row,
+                    top,
                     text=f"{self.money(amount)}  ({pct:.1f}%)",
                     font=("Segoe UI", 9, "bold"),
                     bg=self.colors["card"], fg=self.colors["muted"]
                 ).pack(side="right")
+
+                track = tk.Frame(row, bg=self.colors["border"], height=6)
+                track.pack(fill="x", pady=(4, 2))
+                track.pack_propagate(False)
+
+                if category == "🎯 Goals Saved":
+                    bar_color = self.colors["orange"]
+                elif category == "🛡 Emergency Fund":
+                    bar_color = self.colors["green"]
+                else:
+                    bar_color = self.colors["primary"]
+
+                tk.Frame(
+                    track,
+                    bg=bar_color
+                ).place(
+                    relx=0, rely=0, relheight=1,
+                    relwidth=max(0.01, min(1, pct / 100))
+                )
+
+            # Dedicated progress summaries for Goals and Emergency Fund.
+            progress_box = tk.Frame(category_panel, bg=self.colors["input"])
+            progress_box.pack(fill="x", padx=20, pady=(12, 8))
+
+            tk.Label(
+                progress_box,
+                text="🎯 Goals Progress",
+                font=("Segoe UI", 9, "bold"),
+                bg=self.colors["input"], fg=self.colors["text"]
+            ).pack(anchor="w", padx=12, pady=(10, 2))
+
+            tk.Label(
+                progress_box,
+                text=f"{self.money(goal_saved)} saved of {self.money(goal_target)}  •  {min(max(goal_pct, 0), 100):.1f}%",
+                font=("Segoe UI", 9),
+                bg=self.colors["input"], fg=self.colors["muted"]
+            ).pack(anchor="w", padx=12)
+
+            goal_track = tk.Frame(progress_box, bg=self.colors["border"], height=7)
+            goal_track.pack(fill="x", padx=12, pady=(5, 9))
+            goal_track.pack_propagate(False)
+            tk.Frame(
+                goal_track, bg=self.colors["orange"]
+            ).place(relx=0, rely=0, relheight=1,
+                    relwidth=max(0.01, min(1, goal_pct / 100)))
+
+            tk.Label(
+                progress_box,
+                text="🛡 Emergency Fund Progress",
+                font=("Segoe UI", 9, "bold"),
+                bg=self.colors["input"], fg=self.colors["text"]
+            ).pack(anchor="w", padx=12, pady=(3, 2))
+
+            tk.Label(
+                progress_box,
+                text=f"{self.money(emergency_saved)} saved of {self.money(emergency_target)}  •  {min(max(emergency_pct, 0), 100):.1f}%",
+                font=("Segoe UI", 9),
+                bg=self.colors["input"], fg=self.colors["muted"]
+            ).pack(anchor="w", padx=12)
+
+            emergency_track = tk.Frame(progress_box, bg=self.colors["border"], height=7)
+            emergency_track.pack(fill="x", padx=12, pady=(5, 12))
+            emergency_track.pack_propagate(False)
+            tk.Frame(
+                emergency_track, bg=self.colors["green"]
+            ).place(relx=0, rely=0, relheight=1,
+                    relwidth=max(0.01, min(1, emergency_pct / 100)))
 
         trends = self.panel(body, "💡  Financial Insights")
         trends.pack(side="left", fill="both", expand=True, padx=(7, 0))
